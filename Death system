@@ -18,7 +18,7 @@ public OnFilterScriptExit()
 
 main()
 {
-	print("Einar is the best");
+	print("Dimas So Smart");
 }
 
 #endif
