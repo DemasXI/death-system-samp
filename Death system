@@ -1,0 +1,128 @@
+#include <a_samp>
+#include <zcmd>
+#include <sscanf2>
+
+#if defined FILTERSCRIPT
+
+public OnFilterScriptInit()
+{
+	return 1;
+}
+
+public OnFilterScriptExit()
+{
+	return 1;
+}
+
+#else
+
+main()
+{
+	print("Einar is the best");
+}
+
+#endif
+
+new Text3D:dlabel;
+new Float:X,Float:Y,Float:Z;
+new targetid;
+
+public OnGameModeInit()
+{
+	return 1;
+}
+
+public OnGameModeExit()
+{
+	return 1;
+}
+
+public OnPlayerDeath(playerid, killerid, reason)
+{
+	GetPlayerPos(playerid, X,Y,Z);
+	SetPlayerPos(playerid, X,Y,Z);
+	SendClientMessage(playerid,-1,"SERVER:{FF0000} You have died /acceptdeath to respawn!");
+	Create3DTextLabel("This player is dead.", 0xFB4F04C8, X, Y, Z, 40.0, 0, 0);
+	ApplyAnimation(playerid,"WUZI", "CS_Dead_Guy",4.0,1,1,1,1,1);
+	SetTimerEx("deathtimer", 80, false, "i", playerid);
+	return 1;
+}
+
+forward deathtimer(playerid);
+public deathtimer(playerid)
+{
+	TogglePlayerControllable(playerid,0);
+	return 1;
+}
+
+CMD:get(playerid, params[])
+{
+	GetPlayerPos(playerid, X,Y,Z);
+	if(sscanf(params,"u", targetid)) return SendClientMessage(playerid, -1,"SYNTAX: /get [PlayerID]");
+	if(!IsPlayerConnected(targetid)) return SendClientMessage(playerid, -1,"That player is not connected to the server!");
+	SetPlayerPos(targetid, X,Y,Z);
+	SendClientMessage(playerid,-1,"SERVER: A player was teleported to you");
+	return 1;
+}
+
+CMD:gotoplayer(playerid, params[])
+{
+	GetPlayerPos(targetid, X,Y,Z);
+	if(sscanf(params,"u", targetid)) return SendClientMessage(playerid, -1,"SYNTAX: /gotoplayer [PlayerID]");
+	if(!IsPlayerConnected(targetid)) return SendClientMessage(playerid, -1,"SERVER: That player is not connected to the server!");
+	SetPlayerPos(playerid, X,Y,Z);
+	SendClientMessage(playerid,-1,"SERVER: You have teleported to a player");
+	return 1;
+}
+CMD:revive(playerid,params[])
+{
+    if(IsPlayerAdmin(playerid))
+	{
+		GetPlayerPos(targetid, X,Y,Z);
+		if(sscanf(params,"u", targetid)) return SendClientMessage(playerid,-1,"SYNTAX: /revive [PlayerID]");
+		if(!IsPlayerConnected(targetid)) return SendClientMessage(playerid,-1,"SERVER. That player is not conntected to the server!");
+		SetPlayerHealth(targetid, 100);
+		SetTimerEx("revive", 10000, false, "i", playerid);
+		return 1;
+	}
+	else
+	{
+		SendClientMessage(playerid,-1,"You are not an Admin!");
+	}
+	return 1;
+}
+
+forward revive(playerid);
+
+public revive(playerid)
+{
+	SetPlayerPos(targetid, X,Y,Z);
+}
+
+CMD:suicide(playerid,params[])
+{
+	SetPlayerHealth(playerid,0);
+	return 1;
+}
+CMD:acceptdeath(playerid,params[])
+{
+    if( GetPlayerState(playerid) == PLAYER_STATE_WASTED )
+    {
+	SendClientMessage(playerid,-1,"You will spawn in 60 seconds!");
+ 	SetTimerEx("deathtimer2", 60000, false, "i", playerid);
+ 	}
+	else
+	{
+	    SendClientMessage(playerid,-1,"You are not dead!");
+	}
+    return 1;
+}
+forward deathtimer2(playerid);
+
+public deathtimer2(playerid)
+{
+	SetPlayerHealth(playerid,100);
+	SetPlayerPos(playerid,1178.2015,-1323.9153,14.1084);
+ 	Delete3DTextLabel(dlabel);
+    return 1;
+}
